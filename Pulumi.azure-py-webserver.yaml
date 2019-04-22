@@ -1,0 +1,5 @@
+config:
+  azure-web:password:
+    secure: AAABAOv1j9P1SWnqNlIvTjrUP1GHpfg2j20twyjwyksxsrLAPQe4LzQ=
+  azure-web:username: cloud_admin
+  azure:environment: public
