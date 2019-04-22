@@ -3,40 +3,43 @@
 import pulumi
 from pulumi import Output
 from pulumi_azure import core, compute, network
+import hcl
 
 config = pulumi.Config("azure-web")
 username = config.require("username")
 password = config.require("password")
 
+with open('variables.tf', 'r') as fp:
+    hcl_vars = hcl.load(fp)
+
 resource_group = core.ResourceGroup(
-               "iac-testing",
-               name="iac-testing",
-               location="UK South")
+               hcl_vars['variable']['resource_group_name']['default'],
+               name=hcl_vars['variable']['resource_group_name']['default'],
+               location=hcl_vars['variable']['location']['default'])
+
 
 net = network.VirtualNetwork(
-    "server-network",
-    name="server-network",
+    hcl_vars['variable']['network_name']['default'],
+    name=hcl_vars['variable']['network_name']['default'],
     resource_group_name=resource_group.name,
     location=resource_group.location,
-    address_spaces=["10.0.0.0/16"],
-    subnets=[{
-        "name": "default",
-        "address_prefix": "10.0.1.0/24",
-    }])
+    address_spaces=hcl_vars['variable']['network_address_spaces']['default'],
+    subnets=hcl_vars['variable']['network_subnets']['default']
+)
 
 subnet = network.Subnet(
-    "server-subnet",
-    name="server-subnet",
+    hcl_vars['variable']['network_additional_subnet_name']['default'],
+    name=hcl_vars['variable']['network_additional_subnet_name']['default'],
     resource_group_name=resource_group.name,
     virtual_network_name=net.name,
-    address_prefix="10.0.2.0/24")
+    address_prefix=hcl_vars['variable']['network_additional_subnet_address_prefix']['default'])
 
 public_ip = network.PublicIp(
-    "server-ip",
-    name="server-ip",
+    hcl_vars['variable']['network_public_ip_name']['default'],
+    name=hcl_vars['variable']['network_public_ip_name']['default'],
     resource_group_name=resource_group.name,
     location=resource_group.location,
-    allocation_method="Dynamic")
+    allocation_method=hcl_vars['variable']['network_public_ip_allocation_method']['default'])
 
 network_iface = network.NetworkInterface(
     "server-nic",

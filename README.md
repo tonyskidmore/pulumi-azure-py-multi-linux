@@ -23,7 +23,7 @@ This example deploys an Azure Virtual Machine and starts a HTTP server on it.
 1. Create a new stack:
 
     ```
-    $ pulumi stack init azure-py-webserver
+    $ pulumi stack init azure-py-multi-linux
     ```
 
 1. Set the Azure environment:
@@ -36,7 +36,7 @@ This example deploys an Azure Virtual Machine and starts a HTTP server on it.
 the virtual machine that we are going to create.
 
     ```
-    $ pulumi config set azure-web:username myusername
+    $ pulumi config set azure-web:username cloud_admin
     ```
 
     The password is a secret, so we can ask Pulumi to encrypt the configuration:

@@ -1,3 +1,3 @@
-name: azure-py-webserver
+name: azure-py-multi-linux
 runtime: python
-description: An Azure example using Python to provision a webserver
+description: An Azure example using Python to create multiple Linux servers
