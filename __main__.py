@@ -12,6 +12,8 @@ password = config.require("password")
 with open('variables.tf', 'r') as fp:
     hcl_vars = hcl.load(fp)
 
+# settings for all VMs
+
 resource_group = core.ResourceGroup(
                hcl_vars['variable']['resource_group_name']['default'],
                name=hcl_vars['variable']['resource_group_name']['default'],
@@ -41,53 +43,64 @@ public_ip = network.PublicIp(
     location=resource_group.location,
     allocation_method=hcl_vars['variable']['network_public_ip_allocation_method']['default'])
 
-network_iface = network.NetworkInterface(
-    "server-nic",
-    name="server-nic",
-    resource_group_name=resource_group.name,
-    location=resource_group.location,
-    ip_configurations=[{
-        "name": "webserveripcfg",
-        "subnet_id": subnet.id,
-        "private_ip_address_allocation": "Dynamic",
-        "public_ip_address_id": public_ip.id,
-    }])
+# per VM settings
 
-userdata = """#!/bin/bash
+virtual_machines = hcl_vars['variable']['virtual_machines']['default']
+network_ifaces = []
+vms = []
+vm_counter = 0
+vm_size = 'Standard_B1ls'
 
-echo "Hello, World!" > index.html
-nohup python -m SimpleHTTPServer 80 &"""
+for virtual_machine in virtual_machines:
 
-vm = compute.VirtualMachine(
-    "server-vm",
-    name="server-vm",
-    resource_group_name=resource_group.name,
-    location=resource_group.location,
-    network_interface_ids=[network_iface.id],
-    vm_size="Standard_A0",
-    delete_data_disks_on_termination=True,
-    delete_os_disk_on_termination=True,
-    os_profile={
-        "computer_name": "hostname",
-        "admin_username": username,
-        "admin_password": password,
-        "custom_data": userdata,
-    },
-    os_profile_linux_config={
-        "disable_password_authentication": False,
-    },
-    storage_os_disk={
-        "create_option": "FromImage",
-        "name": "myosdisk1",
-    },
-    storage_image_reference={
-        "publisher": "canonical",
-        "offer": "UbuntuServer",
-        "sku": "16.04-LTS",
-        "version": "latest",
-    })
+    ip_config = [{
+            "name": virtual_machine['name'],
+            "subnet_id": subnet.id,
+            "private_ip_address_allocation": "Dynamic"}]
+    if virtual_machine['name'] == "jump":
+        ip_config['public_ip_address_id']: public_ip.id
 
-combined_output = Output.all(vm.id, public_ip.name,
+    network_ifaces.append(network.NetworkInterface(
+        virtual_machine['name'],
+        name=virtual_machine['name'],
+        resource_group_name=resource_group.name,
+        location=resource_group.location,
+        ip_configurations=ip_config)
+    )
+
+    vms.append(compute.VirtualMachine(
+        virtual_machine['name'],
+        name=virtual_machine['name'],
+        resource_group_name=resource_group.name,
+        location=resource_group.location,
+        network_interface_ids=[network_ifaces[vm_counter].id],
+        vm_size=vm_size,
+        delete_data_disks_on_termination=True,
+        delete_os_disk_on_termination=True,
+        os_profile={
+            "computer_name": "hostname",
+            "admin_username": username,
+            "admin_password": password,
+            # "custom_data": userdata,
+        },
+        os_profile_linux_config={
+            "disable_password_authentication": False,
+        },
+        storage_os_disk={
+            "create_option": "FromImage",
+            "name": virtual_machine['name'],
+        },
+        storage_image_reference={
+            "publisher": virtual_machine['publisher'],
+            "offer": virtual_machine['offer'],
+            "sku": virtual_machine['sku'],
+            "version": virtual_machine['version'],
+        })
+    )
+
+    vm_counter += 1
+
+combined_output = Output.all(vms[0].id, public_ip.name,
                              public_ip.resource_group_name)
 public_ip_addr = combined_output.apply(
     lambda lst: network.get_public_ip(name=lst[1], resource_group_name=lst[2]))

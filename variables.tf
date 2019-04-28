@@ -22,10 +22,6 @@ variable "ssh_key_data" {
     description = "Public SSH key to be used for passwordless SSH access"
 }
 
-variable "hostname" {
-  description = "VM name referenced also in storage-related names."
-  default     = "myazurevm"
-}
 
 variable "admin_username" {
   description = "Admin username"
@@ -73,3 +69,31 @@ variable "network_public_ip_allocation_method" {
   description = "Public IP address allocation method"
   default     = "Dynamic"
 }
+
+variable "virtual_machines" {
+  description = "Virtual Machines to create"
+  default     = [
+    {
+        name            = "jump"
+        publisher       = "OpenLogic"
+        offer           = "CentOS"
+        sku             = "7.6"
+        version         = "latest"
+    },
+    {
+        name            = "CentOS7"
+        publisher       = "OpenLogic"
+        offer           = "CentOS"
+        sku             = "7.6"
+        version         = "latest"
+    },
+    {
+        name            = "CentOS6"
+        publisher       = "OpenLogic"
+        offer           = "CentOS"
+        sku             = "6.10"
+        version         = "latest"
+    }
+  ]
+}
+
