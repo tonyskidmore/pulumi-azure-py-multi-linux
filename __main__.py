@@ -57,8 +57,8 @@ for virtual_machine in virtual_machines:
             "name": virtual_machine['name'],
             "subnet_id": subnet.id,
             "private_ip_address_allocation": "Dynamic"}]
-    if virtual_machine['name'] == "jump":
-        ip_config['public_ip_address_id']: public_ip.id
+    if 'public_ip' in virtual_machine and virtual_machine['public_ip'] == "true":
+        ip_config[0]['public_ip_address_id'] = public_ip.id
 
     network_ifaces.append(network.NetworkInterface(
         virtual_machine['name'],
