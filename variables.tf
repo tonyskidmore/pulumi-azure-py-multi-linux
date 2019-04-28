@@ -20,6 +20,7 @@ variable "location" {
 
 variable "ssh_key_data" {
     description = "Public SSH key to be used for passwordless SSH access"
+    default = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC33xrZvC5u6RHP5xzHr+xPTcx5rde1H8SW02Jw0lhyzE4sAju9LXT5z46HIa3niU9Q8rpyC/YqQ4emLcQS5vKlCjUkQPS+XUv/h0E8W4VxhT75vUpzOII4cVZGU7/QjDppNo9cA//6u3LuoYpxOMCamkxs+/NHLyXciVrSWQ24YE7W21T2C5OGL1z8JAV1Ha1BN6YjNlJJ+kgHU8PnvBmZNSO+rUDyA2RMAjoQvqHWoyUC7+jbuYdCH22T+VrmElTSXMS5nisC3Ivv1UWJGY7zCs0qHJnfX7cyaQ/g/di7CbsAao2OO8zHFFEZmulfjCOlpfdeaKaGF6vydFyuMV6p"
 }
 
 
@@ -27,6 +28,7 @@ variable "admin_username" {
   description = "Admin username"
   default     = "cloud_admin"
 }
+
 variable "admin_password" {
   description = "Admin password"
   default     = "Testing123"

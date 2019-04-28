@@ -9,10 +9,15 @@ config = pulumi.Config("azure-web")
 username = config.require("username")
 password = config.require("password")
 
+
+
 with open('variables.tf', 'r') as fp:
     hcl_vars = hcl.load(fp)
 
 # settings for all VMs
+
+admin_username = hcl_vars['variable']['admin_username']['default']
+ssh_key_data = hcl_vars['variable']['ssh_key_data']['default']
 
 resource_group = core.ResourceGroup(
                hcl_vars['variable']['resource_group_name']['default'],
@@ -79,12 +84,16 @@ for virtual_machine in virtual_machines:
         delete_os_disk_on_termination=True,
         os_profile={
             "computer_name": "hostname",
-            "admin_username": username,
-            "admin_password": password,
+            "admin_username": admin_username,
+            # "admin_password": password,
             # "custom_data": userdata,
         },
         os_profile_linux_config={
-            "disable_password_authentication": False,
+            "disable_password_authentication": True,
+            "ssh_keys": [{
+                "path": "/home/" + admin_username + "/.ssh/authorized_keys",
+                "key_data": ssh_key_data
+            }]
         },
         storage_os_disk={
             "create_option": "FromImage",
