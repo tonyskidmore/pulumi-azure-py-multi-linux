@@ -82,6 +82,7 @@ variable "virtual_machines" {
         sku             = "7.6"
         version         = "latest"
         public_ip       = "true"
+        custom_data     = "true"
     },
     {
         name            = "CentOS7"

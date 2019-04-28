@@ -9,7 +9,11 @@ config = pulumi.Config("azure-web")
 username = config.require("username")
 password = config.require("password")
 
-
+# only for testing, will use bastion host
+userdata = """#!/bin/bash
+sudo yum -y install python-setuptools
+sudo easy_install pip
+sudo pip install ansible[azure]"""
 
 with open('variables.tf', 'r') as fp:
     hcl_vars = hcl.load(fp)
@@ -73,6 +77,13 @@ for virtual_machine in virtual_machines:
         ip_configurations=ip_config)
     )
 
+    os_prof={
+        "computer_name": virtual_machine['name'],
+        "admin_username": admin_username,
+    }
+    if 'custom_data' in virtual_machine and virtual_machine['custom_data'] == "true":
+        os_prof['custom_data'] = userdata
+
     vms.append(compute.VirtualMachine(
         virtual_machine['name'],
         name=virtual_machine['name'],
@@ -82,18 +93,16 @@ for virtual_machine in virtual_machines:
         vm_size=vm_size,
         delete_data_disks_on_termination=True,
         delete_os_disk_on_termination=True,
-        os_profile={
-            "computer_name": "hostname",
-            "admin_username": admin_username,
-            # "admin_password": password,
-            # "custom_data": userdata,
-        },
+        os_profile=os_prof,
         os_profile_linux_config={
             "disable_password_authentication": True,
             "ssh_keys": [{
                 "path": "/home/" + admin_username + "/.ssh/authorized_keys",
                 "key_data": ssh_key_data
             }]
+        },
+        tags={
+            "environment": "Pulumi_Demo"
         },
         storage_os_disk={
             "create_option": "FromImage",
