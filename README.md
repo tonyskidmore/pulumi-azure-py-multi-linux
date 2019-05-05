@@ -1,10 +1,38 @@
 [![Deploy](https://get.pulumi.com/new/button.svg)](https://app.pulumi.com/new)
 
-# Azure Web Server example in Python
+# Azure Multi-Distribution Linux Server example in Python
 
-This example deploys an Azure Virtual Machine and starts a HTTP server on it.
+This example is originally based on the [Azure Web Server example in Python](https://github.com/pulumi/examples/tree/master/azure-py-webserver).  My example use case is to support CI testing of a Linux compliance script (not included) against a number of different Linux VMs.  Initially these distributions will be offers from the Azure Marketplace.  My initial target CI platform will be [Azure DevOps](https://azure.microsoft.com/en-gb/services/devops/) and there is some information already on the Pulumi website [here](https://pulumi.io/reference/cd-azure-devops.html) that should help when it comes to the integration of this project there.
+
+[Pulumi](https://pulumi.io/) looks a very interesting approach to IaC and I like the way that you can use programming language (JavaScipt, TypeScript, Python, Go) constructs rather than trying to use awkward (to me anyway) mechanisms in Terrform, ARM Templates etc. to do things like loops.  
+
+Seeing as this could also be a Terraform project I decided to create the input variables in Terraform format to begin with and use [pyhcl](https://github.com/virtuald/pyhcl) to parse those inputs.  It could have used JSON or YAML for configuration data or just included directly in the Python code.  I have not decided in my thinking yet as whether all configuration should be stored within the script or still maintained outside in the way that Terraform would ingest the HCL variables.  I was considering trying to do the same thing in Terraform after completing the Pulumi side of things, hence the idea of using `variables.tf`.
+
+This test Pulumi project is very much work in progress.
+
+## Python 3
+
+Note that Pulumi requires [Python 3](https://pulumi.io/reference/python.html) as of version 0.16.4 and above.  As my platform of choice is CentOS 7 this is what I did to install a side-by-side installation of Python 3.7.3.  
+
+```
+$ sudo yum -y install gcc openssl-devel bzip2-devel libffi-devel wget
+
+$ cd /usr/src
+$ sudo wget https://www.python.org/ftp/python/3.7.3/Python-3.7.3.tgz
+$ sudo tar xzf Python-3.7.3.tgz
+$ sudo cd Python-3.7.3
+$ sudo ./configure --enable-optimizations
+$ sudo make altinstall
+```
+There might be a better way of achieving getting Pulumi to recognize the Python 3.7 program but I just did this:  
+
+```
+$ sudo ln -s /usr/local/bin/python3.7 /usr/local/bin/python3
+```
+
 
 ## Prerequisites
+
 
 1. [Install Pulumi](https://pulumi.io/install/)
 1. [Configure Pulumi for Azure](https://pulumi.io/quickstart/azure/setup.html)
@@ -83,7 +111,6 @@ the virtual machine that we are going to create.
 
     Duration: 2m55s
 
-    Permalink: https://app.pulumi.com/swgillespie/azure-py-webserver/azuredev/updates/3
     ```
 
 1. Get the IP address of the newly-created instance from the stack's outputs: 
@@ -134,5 +161,4 @@ the virtual machine that we are going to create.
 
     Duration: 3m49s
 
-    Permalink: https://app.pulumi.com/swgillespie/azure-py-webserver/azuredev/updates/4
     ```
